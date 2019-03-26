@@ -1,15 +1,7 @@
 #include <SFML/Graphics.hpp>
-#include <iostream>
 #include <cmath>
 #include <time.h>
-
-const double calculateDeltaTime ( sf::Clock& c, sf::Time& t )
-{
-    sf::Time dt = c.restart();
-    t += dt;
-    return dt.asSeconds();
-}
-
+clock_t t=clock();
 class RGB
 {
 public:
@@ -93,47 +85,42 @@ static RGB HSLToRGB(HSL hsl) {
 
 	return RGB(r, g, b);
 }
-int main()
+void Drawing(sf::RenderWindow& m_window, const double dt=1)
 {
-    sf::Clock dtClock;
-    const   sf::Time timeStep = sf::seconds(0.0005);
-            sf::Time accumulated_dt;
-    dtClock.restart();
 
-    sf::RenderWindow m_window;
-    m_window.create(sf::VideoMode(1280, 720), "SFML works!",sf::Style::Default);
-    m_window.setFramerateLimit(60);
-    m_window.setPosition({0,0});
-
-    while (m_window.isOpen())
-    {
-        double dt = calculateDeltaTime( dtClock, accumulated_dt );
-
-        m_window.clear();
-        if ( accumulated_dt >= timeStep )
-        {
-                accumulated_dt -= timeStep;
                 for(int i =1e3;i--;){
 
                     sf::RectangleShape shape;
-                    shape.setSize({i,9});
-                    shape.move(1e3/2+(i+(int)(timeStep.asSeconds()))*std::sin(i-(int)(timeStep.asSeconds())),1e3/2+(i-(int)(timeStep.asSeconds()))*std::cos(i-(int)(timeStep.asSeconds())));
-                    HSL data=HSL(88*(int)(timeStep.asSeconds())+i/3,0.80f,0.20f);
+                    shape.setSize({i,dt-i});
+                    shape.move(1e3/2+(i-(dt))*std::cos(i-(dt)),1e3/2+(i-(dt))*std::sin(i-(dt)));
+                    HSL data=HSL(((int)(dt*22)+i/3)%360,0.80f,0.30f);
                     RGB value=HSLToRGB(data);
                     sf::Color color(value.R,value.G,value.B);
                     shape.setFillColor(color);
                     m_window.draw(shape);
 
                 }
-        }
-        else
-        {
-            m_window.close();
-            break;
-        }
+}
+
+int main()
+{
 
 
-        m_window.display();
+    sf::RenderWindow window;
+    window.create(sf::VideoMode(1920, 1080), "SFML works!",sf::Style::Default);
+    window.setFramerateLimit(60);
+    window.setPosition({0,0});
+
+    double dt=0;
+    while (window.isOpen())
+    {
+
+
+        window.clear();
+        dt=(clock()-t)/(double) CLOCKS_PER_SEC;
+        Drawing(window,dt);
+        window.display();
+
     }
 
     return 0;
